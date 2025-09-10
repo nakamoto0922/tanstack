@@ -18,6 +18,7 @@ import { Route as UsersIndexRouteImport } from './routes/users/index'
 import { Route as SettingsIndexRouteImport } from './routes/settings/index'
 import { Route as PostsIndexRouteImport } from './routes/posts/index'
 import { Route as SettingsProfileRouteImport } from './routes/settings/profile'
+import { Route as SettingsAdminRouteImport } from './routes/settings/admin'
 import { Route as SettingsAccountRouteImport } from './routes/settings/account'
 import { Route as PostsPostIdRouteImport } from './routes/posts/$postId'
 import { Route as PostsPostIdEditRouteImport } from './routes/posts/$postId/edit'
@@ -65,6 +66,11 @@ const SettingsProfileRoute = SettingsProfileRouteImport.update({
   path: '/settings/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsAdminRoute = SettingsAdminRouteImport.update({
+  id: '/settings/admin',
+  path: '/settings/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SettingsAccountRoute = SettingsAccountRouteImport.update({
   id: '/settings/account',
   path: '/settings/account',
@@ -93,6 +99,7 @@ export interface FileRoutesByFullPath {
   '/heavy': typeof HeavyLazyRoute
   '/posts/$postId': typeof PostsPostIdRouteWithChildren
   '/settings/account': typeof SettingsAccountRoute
+  '/settings/admin': typeof SettingsAdminRoute
   '/settings/profile': typeof SettingsProfileRoute
   '/posts': typeof PostsIndexRoute
   '/settings': typeof SettingsIndexRoute
@@ -107,6 +114,7 @@ export interface FileRoutesByTo {
   '/heavy': typeof HeavyLazyRoute
   '/posts/$postId': typeof PostsPostIdRouteWithChildren
   '/settings/account': typeof SettingsAccountRoute
+  '/settings/admin': typeof SettingsAdminRoute
   '/settings/profile': typeof SettingsProfileRoute
   '/posts': typeof PostsIndexRoute
   '/settings': typeof SettingsIndexRoute
@@ -122,6 +130,7 @@ export interface FileRoutesById {
   '/heavy': typeof HeavyLazyRoute
   '/posts/$postId': typeof PostsPostIdRouteWithChildren
   '/settings/account': typeof SettingsAccountRoute
+  '/settings/admin': typeof SettingsAdminRoute
   '/settings/profile': typeof SettingsProfileRoute
   '/posts/': typeof PostsIndexRoute
   '/settings/': typeof SettingsIndexRoute
@@ -138,6 +147,7 @@ export interface FileRouteTypes {
     | '/heavy'
     | '/posts/$postId'
     | '/settings/account'
+    | '/settings/admin'
     | '/settings/profile'
     | '/posts'
     | '/settings'
@@ -152,6 +162,7 @@ export interface FileRouteTypes {
     | '/heavy'
     | '/posts/$postId'
     | '/settings/account'
+    | '/settings/admin'
     | '/settings/profile'
     | '/posts'
     | '/settings'
@@ -166,6 +177,7 @@ export interface FileRouteTypes {
     | '/heavy'
     | '/posts/$postId'
     | '/settings/account'
+    | '/settings/admin'
     | '/settings/profile'
     | '/posts/'
     | '/settings/'
@@ -181,6 +193,7 @@ export interface RootRouteChildren {
   HeavyLazyRoute: typeof HeavyLazyRoute
   PostsPostIdRoute: typeof PostsPostIdRouteWithChildren
   SettingsAccountRoute: typeof SettingsAccountRoute
+  SettingsAdminRoute: typeof SettingsAdminRoute
   SettingsProfileRoute: typeof SettingsProfileRoute
   PostsIndexRoute: typeof PostsIndexRoute
   SettingsIndexRoute: typeof SettingsIndexRoute
@@ -245,6 +258,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/settings/admin': {
+      id: '/settings/admin'
+      path: '/settings/admin'
+      fullPath: '/settings/admin'
+      preLoaderRoute: typeof SettingsAdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/settings/account': {
       id: '/settings/account'
       path: '/settings/account'
@@ -297,6 +317,7 @@ const rootRouteChildren: RootRouteChildren = {
   HeavyLazyRoute: HeavyLazyRoute,
   PostsPostIdRoute: PostsPostIdRouteWithChildren,
   SettingsAccountRoute: SettingsAccountRoute,
+  SettingsAdminRoute: SettingsAdminRoute,
   SettingsProfileRoute: SettingsProfileRoute,
   PostsIndexRoute: PostsIndexRoute,
   SettingsIndexRoute: SettingsIndexRoute,

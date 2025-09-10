@@ -1,11 +1,7 @@
-import {
-  Link,
-  Outlet,
-  ScrollRestoration,
-  createRootRouteWithContext,
-} from '@tanstack/react-router'
+import { Link, Outlet, ScrollRestoration, createRootRouteWithContext } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import type { QueryClient } from '@tanstack/react-query'
+import { getUser, logout } from '@/lib/auth'
 
 type RouterContext = {
   queryClient: QueryClient
@@ -35,7 +31,8 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 })
 
 function RootLayout() {
-  const isAuthed = typeof window !== 'undefined' && !!localStorage.getItem('auth')
+  const user = getUser()
+  const isAuthed = !!user
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
@@ -66,7 +63,7 @@ function RootLayout() {
               <button
                 className="px-3 py-1 rounded bg-gray-900 text-white hover:bg-black"
                 onClick={() => {
-                  localStorage.removeItem('auth')
+                  logout()
                   // force a navigation to update UI
                   window.location.href = '/'
                 }}
@@ -92,4 +89,3 @@ function RootLayout() {
     </div>
   )
 }
-

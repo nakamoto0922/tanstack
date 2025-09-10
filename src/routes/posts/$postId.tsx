@@ -1,9 +1,10 @@
 import { Link, createFileRoute, redirect } from '@tanstack/react-router'
+import { z } from 'zod'
 
 type Post = { id: number; title: string; body: string }
 
 export const Route = createFileRoute('/posts/$postId')({
-  parseParams: (p) => ({ postId: String(p.postId) }),
+  parseParams: (p) => z.object({ postId: z.string().regex(/^\d+$/) }).parse(p),
   loader: async ({ params, signal }) => {
     const res = await fetch(`https://jsonplaceholder.typicode.com/posts/${params.postId}`, { signal })
     if (res.status === 404) {
@@ -52,4 +53,3 @@ function PostPage() {
     </div>
   )
 }
-

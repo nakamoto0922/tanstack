@@ -1,18 +1,20 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { z } from 'zod'
 
-type Search = { q: string; sort: 'relevance' | 'date' }
+const searchSchema = z.object({
+  q: z.string().catch(''),
+  sort: z.enum(['relevance', 'date']).catch('relevance'),
+})
+type Search = z.infer<typeof searchSchema>
 
 export const Route = createFileRoute('/search')({
-  validateSearch: (s: Record<string, unknown>): Search => {
-    const q = typeof s.q === 'string' ? s.q : ''
-    const sort = s.sort === 'date' ? 'date' : 'relevance'
-    return { q, sort }
-  },
+  validateSearch: (s: Record<string, unknown>): Search => searchSchema.parse(s),
   component: SearchPage,
 })
 
 function SearchPage() {
   const search = Route.useSearch()
+  const navigate = useNavigate({ from: '/search' })
 
   return (
     <div className="space-y-4">
@@ -26,14 +28,20 @@ function SearchPage() {
         <input
           type="search"
           value={search.q}
-          onChange={(e) => Route.navigate({ search: (s) => ({ ...s, q: e.target.value }) })}
+          onChange={(e) =>
+            navigate({ to: '/search', search: (s: Search) => ({ ...s, q: e.target.value }), replace: true })
+          }
           placeholder="検索ワード"
           className="border rounded px-2 py-1 w-64"
         />
         <select
           value={search.sort}
           onChange={(e) =>
-            Route.navigate({ search: (s) => ({ ...s, sort: e.target.value as Search['sort'] }) })
+            navigate({
+              to: '/search',
+              search: (s: Search) => ({ ...s, sort: e.target.value as Search['sort'] }),
+              replace: true,
+            })
           }
           className="border rounded px-2 py-1"
         >
@@ -48,4 +56,3 @@ function SearchPage() {
     </div>
   )
 }
-

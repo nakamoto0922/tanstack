@@ -47,6 +47,25 @@
 - 例: `src/routes/posts/index.tsx` の `page`/`q`、`src/routes/search.tsx` の `q`/`sort`。
 - `Route.navigate({ search: ... })` でフォーム変更をクエリに即時反映。
 
+## 追加: 型強化（Zod）
+
+本プロジェクトでは Zod を用いて `validateSearch`/`parseParams` の型とデフォルトを厳密化しました。
+
+- 導入: `package.json` に `zod` を追加（`npm i zod`）。
+- Posts 検索の型付けと既定値
+  - `src/routes/posts/index.tsx` の `searchSchema`
+  - `page` を `>=1` の整数へ強制、`q` は空文字を `undefined` にクレンジング
+- Search の列挙型（`sort`）
+  - `src/routes/search.tsx` の `searchSchema`
+  - `sort` を `'relevance' | 'date'` に限定、未指定/不正値は `'relevance'`
+- 動的パラメータ検証
+  - `src/routes/posts/$postId.tsx` の `parseParams` で数値文字列のみ許可
+
+ポイント
+- `validateSearch` の戻り値型が、そのルートの `useSearch()` や `navigate({ search })` に反映されます。
+- `.catch(default)` で未指定・不正値のデフォルトを一元管理。
+- `.transform()` で空文字→`undefined` にして URL をクリーンに保つ設計。
+
 ## 動的パラメータ / ネスト
 
 - `$postId.tsx` のように `$` 接頭辞でパラメータ化（`/posts/:postId`）。
@@ -56,6 +75,25 @@
 
 - `beforeLoad` で認可チェックし、未ログインなら `redirect` を投げて `/login` へ。
 - 例: `src/routes/settings/index.tsx`。
+
+## 追加: ルートガード高度化
+
+ローカルストレージを用いた簡易認証をユーティリティに切り出し、未認証時のリダイレクトやロールチェックを強化しています。
+
+- 認証ユーティリティ: `src/lib/auth.ts`
+  - `getUser()/isAuthed()/hasRole()` と `login()/logout()` を提供
+- ログイン画面: `src/routes/login.tsx`
+  - `?redirect=/...` を受け取り、ログイン後に安全なパスへ遷移
+  - Admin ロールを付与可能（チェックボックス）
+- Settings の保護: `src/routes/settings/index.tsx`
+  - `beforeLoad` で未認証を `/login?redirect=...` へ
+  - `forbidden`/`back` クエリで権限不足のフィードバック表示
+- Admin 専用ページ: `src/routes/settings/admin.tsx`
+  - `hasRole('admin')` でロール検査し、権限不足は `/settings?forbidden=1` にリダイレクト
+
+実務 Tips
+- リダイレクト先は `/` から始まる相対パスのみ許容し、オープンリダイレクトを防止（`login.tsx` の Zod で実装）。
+- 権限チェックは「グループ親の `beforeLoad`」に集約し、特定ページは追加チェックを重ねると保守性が高いです。
 
 ## ルートブロッカー（離脱確認）
 
@@ -89,4 +127,3 @@
 - TanStack Router Docs: https://tanstack.com/router/latest/docs/framework/react/overview
 - File Based Routing: https://tanstack.com/router/latest/docs/framework/react/guide/file-based-routing
 - Code Based Routing: https://tanstack.com/router/latest/docs/framework/react/guide/code-based-routing
-

@@ -1,21 +1,25 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { z } from 'zod'
 
-type Search = {
-  page: number
-  q?: string
-}
+const searchSchema = z.object({
+  page: z.coerce.number().int().min(1).catch(1),
+  q: z
+    .string()
+    .transform((s) => s.trim())
+    .transform((s) => (s.length ? s : undefined))
+    .optional()
+    .catch(undefined),
+})
+type Search = z.infer<typeof searchSchema>
 
 export const Route = createFileRoute('/posts/')({
-  validateSearch: (search: Record<string, unknown>): Search => {
-    const page = Math.max(1, Number(search.page ?? 1) || 1)
-    const q = typeof search.q === 'string' && search.q.length ? search.q : undefined
-    return { page, q }
-  },
+  validateSearch: (search: Record<string, unknown>): Search => searchSchema.parse(search),
   loaderDeps: ({ search }) => ({ page: search.page, q: search.q }),
   loader: async ({ signal, deps }) => {
     const params = new URLSearchParams()
     params.set('_limit', '10')
     params.set('_page', String(deps.page))
+    console.log("deps",deps)
     if (deps.q) params.set('q', deps.q)
     const res = await fetch(`https://jsonplaceholder.typicode.com/posts?${params}`, {
       signal,
@@ -36,6 +40,7 @@ function PostsPage() {
   const { items } = Route.useLoaderData()
   const prevPage = Math.max(1, page - 1)
   const nextPage = page + 1
+  const navigate = useNavigate({ from: '/posts/' })
 
   return (
     <div className="space-y-4">
@@ -47,7 +52,7 @@ function PostsPage() {
           e.preventDefault()
           const form = e.currentTarget as HTMLFormElement
           const input = form.elements.namedItem('q') as HTMLInputElement
-          Route.navigate({ search: (s) => ({ ...s, q: input.value || undefined, page: 1 }) })
+          navigate({ to: '/posts/', search: (s: Search) => ({ ...s, q: input.value || undefined, page: 1 }) })
         }}
       >
         <input
@@ -87,4 +92,3 @@ function PostsPage() {
     </div>
   )
 }
-
